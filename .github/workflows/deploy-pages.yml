@@ -1,0 +1,52 @@
+name: Deploy frozen RC3 to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  verify-and-package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+    steps:
+      - name: Checkout reviewed commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Setup Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Verify immutable RC3
+        shell: bash
+        run: |
+          node tools/build-rc.mjs --verify
+          test "$(sha256sum releases/web-rc3/release-manifest.json | cut -d' ' -f1)" = "6ee75a1a89d1fb4b90c913c98327cc59aeecf8258e89d8d3b0203f559178024c"
+          test -f releases/web-rc3/site/.nojekyll
+          test "$(find releases/web-rc3/site -type f | wc -l)" -eq 52
+      - name: Configure Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - name: Upload approved site only
+        uses: actions/upload-pages-artifact@5f327015a708106f6f1b7c9a633901af30fe80cb
+        with:
+          path: releases/web-rc3/site
+          include-hidden-files: true
+
+  deploy:
+    needs: verify-and-package
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy approved artifact
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

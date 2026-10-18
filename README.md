@@ -5,7 +5,7 @@
 **Planned Demo — Not Yet Deployed:**  
 https://aidenxiao0924.github.io/HW2-Smart-Home-Energy-Prediction/
 
-目前網址僅為規劃目標；公開 Repository 尚無首次提交，GitHub Pages 尚未啟用或完成公開驗收。
+目前網址僅為規劃目標；公開 Repository 已完成首次提交，GitHub Pages 尚未啟用或完成公開驗收。
 
 ## Project Overview
 
