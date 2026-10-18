@@ -2,10 +2,10 @@
 
 > 課程機器學習專題｜CRISP-DM｜Multiple Linear Regression｜純靜態互動式 Dashboard
 
-**Planned Demo — Not Yet Deployed:**  
+**Live Demo:**  
 https://aidenxiao0924.github.io/HW2-Smart-Home-Energy-Prediction/
 
-目前網址僅為規劃目標；公開 Repository 已完成首次提交，GitHub Pages 尚未啟用或完成公開驗收。
+GitHub Pages 已正式部署，並完成公開 HTTPS 與 Chrome、Edge、Firefox 驗收。
 
 ## Project Overview
 
@@ -116,7 +116,7 @@ Python 3.11、pandas、NumPy、scikit-learn、SciPy、statsmodels、Matplotlib�
 - Training Min/Max只提供逐特徵警告。
 - Correlation與Permutation Importance不代表因果。
 - 網站、外部CSV與What-If結果不可解讀為節能因果效果。
-- Planned Demo在M4-B2完成真實HTTPS與三瀏覽器驗收後，才可改標Live。
+- Live Demo已完成真實HTTPS與Chrome、Edge、Firefox驗收。
 
 
 ## License
