@@ -1,0 +1,8 @@
+export const LIMITS=Object.freeze({bytes:10000000,rows:20000,batch:500,columns:256,cell:100000,timeout:30000});
+export const MESSAGES=Object.freeze({
+ MISSING_COLUMN:'必要欄位缺失；請使用正式Template欄名。',INVALID_DATE:'date須為有效來源日曆時間YYYY-MM-DD HH:mm:ss。',NONFINITE_OR_TYPE:'感測值須為有限十進位／科學記號；空白或null才可填補。',TIME_FEATURE_MISMATCH:'Hour若有欄位必須為0–23整數且與date一致。',INVALID_TARGET:'Appliances只能空白或有限非負Wh數值。',FILE_TOO_LARGE:'檔案超過10,000,000 bytes上限。',TOO_MANY_ROWS:'CSV超過20,000筆資料上限。',UNSUPPORTED_URL:'只接受無帳密／片段、預設HTTPS連接埠的公開DNS網址。',CSV_PARSE_ERROR:'CSV結構或列欄數錯誤；請檢查逗號、雙引號與換行。',MODEL_VERSION_MISMATCH:'正式模型或Schema驗證失敗，停止推論。',DUPLICATE_HEADER:'CSV有重複欄名，請移除重複欄。',EMPTY_HEADER:'CSV欄名不可空白。',TOO_MANY_COLUMNS:'CSV超過256欄的安全上限。',CELL_TOO_LONG:'單一儲存格超過100,000字元。',ENCODING_ERROR:'只支援有效UTF-8 CSV；請重新以UTF-8儲存。',EMPTY_CSV:'CSV沒有資料列；空白Template不是成功的預測結果。',HTTP_ERROR:'遠端HTTP回應失敗；請確認公開CSV直連。',CORS_OR_NETWORK:'瀏覽器無法讀取回應（可能為CORS、網路或TLS問題）；請下載後改用本機上傳。',REDIRECT_BLOCKED:'為避免不安全轉址，本工具拒絕Redirect；請提供最終HTTPS CSV直連。',TIMEOUT:'CSV讀取逾時；請稍後再試或改用本機上傳。',CANCELLED:'作業已取消；不提供未完成批次的結果下載。',NUMERIC_OVERFLOW:'該列造成數值溢位，未產生有效預測。'});
+export class CsvError extends Error{constructor(code,row=null,field=null){super(MESSAGES[code]||MESSAGES.CSV_PARSE_ERROR);this.name='CsvError';this.code=Object.hasOwn(MESSAGES,code)?code:'CSV_PARSE_ERROR';this.row=row;this.field=field;}}
+export const errorRecord=e=>({code:e.code,row:e.row??null,field:e.field??null,message:MESSAGES[e.code]||MESSAGES.CSV_PARSE_ERROR});
+export const errorEnvelope=e=>({schema_version:'1.1.0',status:'INVALID_INPUT',errors:[errorRecord(e)]});
+export function checkAbort(signal){if(signal?.aborted)throw new CsvError('CANCELLED');}
+export const yieldUI=()=>new Promise(resolve=>setTimeout(resolve,0));

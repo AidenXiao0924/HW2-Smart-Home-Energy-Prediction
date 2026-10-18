@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "smoke_only_not_research_conclusion",
+  "training_prefix_rows": 360,
+  "seed": 42,
+  "outer_splits": 5,
+  "inner_splits": 5,
+  "candidate_set": "deployable27",
+  "permutation_repeats": 2,
+  "experiments": [
+    {"method": "select_k_best", "k": 15, "model": "mlr"},
+    {"method": "rfe", "k": 15, "model": "mlr"},
+    {"method": "permutation", "k": 15, "model": "mlr"}
+  ]
+}

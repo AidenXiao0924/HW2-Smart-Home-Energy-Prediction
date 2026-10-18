@@ -1,0 +1,22 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {createLoader,validate,DataError,sha256} from '../../web/js/core/loader.js';
+import {FEATURES,MANIFEST_HASH,PAGES} from '../../web/js/core/config.js';
+const root=new URL('../../artifacts/deployment/mlr-1.0.0/',import.meta.url);
+const read=async name=>JSON.parse(await readFile(new URL(name,root),'utf8'));
+function mock(changes={}){const seen=[];return {seen,fetcher:async url=>{const name=decodeURI(url.pathname.split('/mlr-1.0.0/')[1]);seen.push(name);if(changes[name]==='404')return {ok:false};const raw=changes[name]||await readFile(new URL(name,root));return {ok:true,arrayBuffer:async()=>Uint8Array.from(raw).buffer};}};}
+test('five distinct pages; deployment feature policy',()=>{assert.equal(PAGES.length,5);assert.equal(new Set(PAGES.map(p=>p[0])).size,5);assert.equal(FEATURES.length,15);assert(!FEATURES.some(f=>['lights','rv1','rv2'].includes(f)));});
+test('manifest pinned to C3 source',async()=>assert.equal(await sha256(await readFile(new URL('manifest.json',root))),MANIFEST_HASH));
+for(const name of ['research_summary.json','attribution.json','model.json','charts/training_cv.json','charts/test_series.json','charts/test_residuals.json'])test('load real '+name,async()=>{const m=mock();const v=await createLoader({fetcher:m.fetcher}).load(name);assert(v);assert.equal(m.seen.length,2);});
+test('initial loading excludes model, charts, fixtures and schemas; cache',async()=>{const m=mock(),l=createLoader({fetcher:m.fetcher});await Promise.all([l.load('research_summary.json'),l.load('attribution.json')]);await l.load('research_summary.json');assert.deepEqual(m.seen.sort(),['attribution.json','manifest.json','research_summary.json']);});
+test('project subpath preserved',async()=>{const m=mock();const urls=[];const l=createLoader({base:new URL('https://example.org/HW2_Smart-Home-Energy/public/mlr-1.0.0/'),fetcher:async u=>{urls.push(u.href);return m.fetcher(u);}});await l.load('model.json');assert(urls.every(u=>u.startsWith('https://example.org/HW2_Smart-Home-Energy/')));});
+test('HTTP missing data fails without fallback; retry works',async()=>{const changes={'model.json':'404'},m=mock(changes),l=createLoader({fetcher:m.fetcher});await assert.rejects(l.load('model.json'),{code:'HTTP_ERROR'});delete changes['model.json'];assert(await l.load('model.json'));});
+test('modified JSON blocked by hash',async()=>{const m=mock({'model.json':Buffer.from('{}')});await assert.rejects(createLoader({fetcher:m.fetcher}).load('model.json'),{code:'HASH_MISMATCH'});});
+test('manifest corruption blocked',async()=>{const m=mock({'manifest.json':Buffer.from('{}')});await assert.rejects(createLoader({fetcher:m.fetcher}).load('model.json'),{code:'HASH_MISMATCH'});});
+test('network failure fixed safe code',async()=>await assert.rejects(createLoader({fetcher:async()=>{throw Error('private detail');}}).load('model.json'),{code:'NETWORK_ERROR'}));
+test('unallowlisted name and traversal rejected',async()=>{for(const n of ['../../model.json','data/raw.csv','unknown.json'])await assert.rejects(createLoader({fetcher:mock().fetcher}).load(n),DataError);});
+for(const kind of ['version','features','q','scale','coefficient','unit'])test('model contract rejects '+kind,async()=>{const m=await read('model.json');if(kind==='version')m.model_version='mlr-2.0.0';if(kind==='features')m.feature_order.reverse();if(kind==='q')m.prediction_interval.q+=1;if(kind==='scale')m.preprocessing.scaler.scale[0]=0;if(kind==='coefficient')m.coefficients[0]=Infinity;if(kind==='unit')m.features[0].name='lights';assert.throws(()=>validate('model.json',m),DataError);});
+test('summary split labels mandatory',async()=>{const s=await read('research_summary.json');s.test.split='VALIDATION';assert.throws(()=>validate('research_summary.json',s),DataError);});
+test('empty chart explicit state',async()=>{const c=await read('charts/test_series.json');c.rows=[];assert.throws(()=>validate('charts/test_series.json',c),{code:'EMPTY'});});
+test('router/loader/legacy shell contain no inline fitting formula',async()=>{for(const p of ['app.js','core/loader.js','pages/future.js']){const code=await readFile(new URL('../../web/js/'+p,import.meta.url),'utf8');assert(!/\.predict\(|Papa\.|fit_transform\(|\.fit\(/.test(code));}});

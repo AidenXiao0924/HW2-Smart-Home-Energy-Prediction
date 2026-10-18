@@ -1,0 +1,15 @@
+{
+  "purpose": "full_training_preflight_not_research_conclusion",
+  "seed": 42,
+  "outer_splits": 5,
+  "inner_splits": 5,
+  "permutation_repeats": 5,
+  "blas_threads": 1,
+  "experiments": [
+    {"method": "select_k_best", "k": 15, "candidate_set": "deployable27", "folds": [0,1,2,3,4]},
+    {"method": "rfe", "k": 15, "candidate_set": "research28", "folds": [0,1,2,3,4]},
+    {"method": "permutation", "k": 15, "candidate_set": "deployable27", "folds": [0,1,2,3,4]},
+    {"method": "lasso", "k": 15, "candidate_set": "deployable27", "folds": [0,1,2,3,4]},
+    {"method": "forward_sfs", "k": 10, "candidate_set": "deployable27", "folds": [4]}
+  ]
+}

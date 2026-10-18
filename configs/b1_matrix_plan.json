@@ -1,0 +1,13 @@
+{
+  "status": "NOT_RUN",
+  "candidate_sets": ["deployable27", "research28"],
+  "methods": ["select_k_best", "rfe", "forward_sfs", "lasso", "permutation"],
+  "k": [10, 15, 20, 25, "ALL"],
+  "model": "mlr",
+  "outer_splits": 5,
+  "inner_splits": 5,
+  "seed": 42,
+  "selector_lasso_alpha": 1.0,
+  "permutation_repeats": 5,
+  "note": "Planning only. Lasso ranking alpha fixed a priori, not tuned on any held-out set. ALL bypasses selector ranking. No formal matrix execution in B1."
+}

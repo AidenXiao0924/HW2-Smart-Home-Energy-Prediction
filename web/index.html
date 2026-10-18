@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="智慧家庭能源消耗研究展示：凍結 MLR 模型、可追溯研究資料與限制。">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <title>Overview | Home Energy Lab</title>
+  <link rel="stylesheet" href="./css/styles.css"><script type="module" src="./js/app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">跳至主要內容</a>
+  <button id="menu-toggle" class="menu-toggle" aria-controls="sidebar" aria-expanded="false">開啟導覽</button>
+  <div id="scrim" class="scrim" hidden></div>
+  <aside id="sidebar" class="sidebar">
+    <a class="brand" href="#overview"><span class="brand-icon" aria-hidden="true">E</span><span>HOME ENERGY<span class="brand-sub">RESEARCH LAB / 2026</span></span></a>
+    <p class="nav-label">WORKSPACE</p><nav id="navigation" aria-label="主要頁面"></nav>
+    <div class="sidebar-foot"><span class="dot" aria-hidden="true"></span> STATIC RESEARCH EDITION<p>mlr-1.0.0 · 凍結研究模型</p></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><span>智慧家庭能源消耗研究</span><span class="badge">web-rc3 · Training Analytics</span></header>
+    <main id="main" tabindex="-1">
+      <div class="page-heading"><div><p class="eyebrow">SMART HOME / ENERGY ANALYTICS</p><h1 id="page-title">Overview</h1><p id="page-subtitle" class="muted">研究總覽</p></div><span class="badge model-badge">mlr-1.0.0</span></div>
+      <div id="page-content" aria-busy="true"><p role="status">LOADING · 正在載入正式研究資料…</p></div>
+      <noscript><p>請啟用 JavaScript 以讀取正式研究摘要與五頁導覽。此網站不需要 Python Backend。</p></noscript>
+      <aside class="notice" aria-label="模型限制"><strong>研究的邊界</strong><p>估計同一時間區間的能源消耗，並非未來預測。線性模型可能低估高耗電峰值；相關性不代表因果。實際 Test Coverage 不構成未來時間序列嚴格的 95% 覆蓋保證。</p></aside>
+    </main>
+    <footer><div id="attribution" aria-live="polite">資料來源載入中…</div><p class="footer-status">DEPLOYMENT_PENDING · 尚未公開部署 · Simulator／CSV可用 · 研究結果與外部資料分開</p></footer>
+  </div>
+</body>
+</html>

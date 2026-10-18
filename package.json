@@ -1,0 +1,15 @@
+{
+  "name": "smart-home-energy-foundation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/javascript/*.test.mjs",
+    "audit:web": "node tools/web-assets.mjs",
+    "build:rc": "node tools/build-rc.mjs",
+    "verify:rc": "node tools/build-rc.mjs --verify",
+    "qa:security": "node tools/m4a1-security.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

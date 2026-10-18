@@ -1,0 +1,15 @@
+import {checkRange,unavailableRange} from '../core/training-data.js';
+import {CsvError,LIMITS,checkAbort,yieldUI,errorRecord} from './contracts.js';
+import {adaptRow,validateHeaders} from './adapter.js';
+import {predictionSummary,evaluateExternal} from './analytics.js';
+export async function runBatch(parsed,engine,{signal,onProgress=()=>{},yieldFn=yieldUI,batchSize=LIMITS.batch,rangeBundle=null}={}){
+ if(!Number.isInteger(batchSize)||batchSize<1||batchSize>LIMITS.batch)throw new CsvError('CSV_PARSE_ERROR');if(parsed.rows.length>LIMITS.rows)throw new CsvError('TOO_MANY_ROWS');validateHeaders(parsed.headers,engine.model);checkAbort(signal);
+ const results=[],batches=[];for(let start=0;start<parsed.rows.length;start+=batchSize){checkAbort(signal);const end=Math.min(start+batchSize,parsed.rows.length);batches.push(end-start);
+  for(let i=start;i<end;i++){const record=parsed.rows[i];let row,extra={};const result={row_number:record.row_number,line_number:record.line_number,date:'',model_version:engine.model.model_version,actual:null,predicted:null,lower:null,upper:null,interval_valid:false,warnings:[],imputed_features:[],status:'ERROR',errors:[],extra_fields:extra,ood:{status:'NOT_EVALUATED',is_ood:null,details:[],imputed_features:[]}};
+   const known=new Set([...engine.model.feature_order,'date','Appliances']);result.date=String(record.cells[parsed.headers.indexOf('date')]??'').trim();result.extra_fields=Object.fromEntries(parsed.headers.flatMap((f,j)=>known.has(f)?[]:[[f,record.cells[j]??'']]));
+   try{const converted=adaptRow(record,parsed.headers,engine.model);row=converted.row;extra=converted.extra;result.date=row.date;result.actual=row.Appliances??null;result.extra_fields=extra;const prediction=engine.predictOne(row);Object.assign(result,{predicted:prediction.predicted,lower:prediction.lower,upper:prediction.upper,interval_valid:prediction.interval_valid,warnings:prediction.warnings,imputed_features:prediction.imputed_features,status:!prediction.interval_valid?'INVALID_INTERVAL':prediction.warnings.length?'WARNING':'SUCCESS'});try{result.ood=checkRange(row,rangeBundle);}catch{result.ood=unavailableRange('CHECK_FAILED');}}
+   catch(e){const known=['MISSING_COLUMN','INVALID_DATE','NONFINITE_OR_TYPE','TIME_FEATURE_MISMATCH','INVALID_TARGET','CSV_PARSE_ERROR'];const code=e instanceof CsvError?e.code:known.includes(e.code)?e.code:e.code==='NONFINITE_RESULT'?'NUMERIC_OVERFLOW':'MODEL_VERSION_MISMATCH';result.errors=[errorRecord(new CsvError(code,record.row_number,e.field??null))];}
+   results.push(result);
+  }onProgress({phase:'PREDICTING',current:end,total:parsed.rows.length});await yieldFn();
+ }checkAbort(signal);return {state:results.length===0?'EMPTY':results.every(r=>r.status==='ERROR')?'ERROR':results.some(r=>r.status==='ERROR')?'PARTIAL_FAILURE':'SUCCESS',headers:parsed.headers,results,ood_summary:Object.fromEntries(['OOD_WARNING','IN_RANGE','IMPUTED','UNAVAILABLE','NOT_EVALUATED'].map(k=>[k,results.filter(r=>r.ood.status===k).length])),summary:predictionSummary(results),evaluation:evaluateExternal(results,engine.model.feature_order.length),batches,target_header:parsed.headers.includes('Appliances')};
+}

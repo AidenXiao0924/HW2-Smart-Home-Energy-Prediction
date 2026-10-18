@@ -1,0 +1,4 @@
+# Install after requirements.txt; document tooling only, no model updates.
+reportlab>=4.2,<5
+pypdf>=5,<7
+pdfplumber>=0.11,<1

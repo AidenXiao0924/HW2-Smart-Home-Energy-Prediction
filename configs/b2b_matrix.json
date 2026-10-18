@@ -1,0 +1,16 @@
+{
+  "purpose": "formal_training_feature_selection_cv",
+  "schema_version": "1.0.0",
+  "seed": 42,
+  "outer_splits": 5,
+  "inner_splits": 5,
+  "permutation_repeats": 5,
+  "selector_lasso_alpha": 1.0,
+  "blas_threads": 1,
+  "candidate_sets": ["deployable27", "research28"],
+  "method_order": ["select_k_best", "rfe", "lasso", "permutation", "forward_sfs"],
+  "k": [10, 15, 20, 25, "ALL"],
+  "rmse_std_ddof": 0,
+  "reuse_policy": "ALL only: same candidate set, split and MLR; canonical SelectKBest ALL source",
+  "baselines": ["mean", "full_feature_mlr"]
+}
